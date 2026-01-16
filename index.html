@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Velocímetro GPS</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#020617">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<style>
+body {
+  margin: 0;
+  background: #020617;
+  color: #ffffff;
+  font-family: system-ui, sans-serif;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100vh;
+}
+
+#titulo {
+  font-size: 20px;
+  color: #bfbfbf;
+}
+
+#vel {
+  font-size: 100px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+#unidad {
+  font-size: 24px;
+}
+
+#status {
+  font-size: 14px;
+  color: red;
+  margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="titulo">VELOCIDAD ACTUAL</div>
+<div id="vel">0</div>
+<div id="unidad">km/h</div>
+<div id="status">Esperando señal GPS…</div>
+
+<script>
+/* --- PANTALLA SIEMPRE ENCENDIDA --- */
+let wakeLock = null;
+async function keepScreenOn() {
+  try {
+    wakeLock = await navigator.wakeLock.request('screen');
+  } catch (e) {}
+}
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") keepScreenOn();
+});
+keepScreenOn();
+
+/* --- GPS --- */
+navigator.geolocation.watchPosition(
+  pos => {
+    const kmh = (pos.coords.speed || 0) * 3.6;
+    document.getElementById("vel").textContent = Math.round(kmh);
+    document.getElementById("status").textContent = "Señal GPS: Conectado";
+    document.getElementById("status").style.color = "lime";
+  },
+  err => {
+    document.getElementById("status").textContent = "Esperando señal GPS…";
+    document.getElementById("status").style.color = "red";
+  },
+  {
+    enableHighAccuracy: true,
+    maximumAge: 1000,
+    timeout: 10000
+  }
+);
+
+/* --- SERVICE WORKER --- */
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js");
+}
+</script>
+
+</body>
+</html>
