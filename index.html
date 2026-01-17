@@ -44,6 +44,20 @@ body {
   color: red;
   margin-top: 10px;
 }
+  
+@media (orientation: landscape) {
+  #titulo {
+    font-size: 24px;
+  }
+  
+  #vel {
+    font-size: 120px;
+  }
+
+  #unidad {
+    font-size: 36px;
+  }
+}
 </style>
 </head>
 
@@ -70,9 +84,7 @@ keepScreenOn();
 /* --- GPS --- */
 navigator.geolocation.watchPosition(
   pos => {
-    let kmh = (pos.coords.speed || 0) * 3.6;
-if (kmh < 5) kmh = 0;
-
+    const kmh = (pos.coords.speed || 0) * 3.6;
     document.getElementById("vel").textContent = Math.round(kmh);
     document.getElementById("status").textContent = "Señal GPS: Conectado";
     document.getElementById("status").style.color = "lime";
